@@ -154,6 +154,21 @@ export default function EnvironmentScreen() {
           </View>
         </View>
 
+        {/* Gemini AI Status */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Gemini AI Service</Text>
+          <View style={styles.statusItem}>
+            {renderOptionalIcon(envStatus.gemini.configured)}
+            <Text style={styles.statusLabel}>Overall Status</Text>
+            <Text style={styles.statusValue}>
+              {envStatus.gemini.configured ? 'Configured' : 'Optional - Not Configured'}
+            </Text>
+          </View>
+          <View style={styles.statusItem}>
+            <Text style={styles.statusDetail}>API Key: {envStatus.gemini.apiKey}</Text>
+          </View>
+        </View>
+
         {/* Missing Configuration */}
         {envStatus.missing.length > 0 && (
           <View style={styles.missingSection}>

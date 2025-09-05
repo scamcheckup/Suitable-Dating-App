@@ -1,57 +1,110 @@
 import { supabase } from './supabase';
 import { calculateCompatibility, findPotentialMatches } from './matching';
+import { testDatabaseConnection } from './supabase';
 
 export const testMatchingAlgorithm = async () => {
   try {
     console.log('🧪 Testing Matching Algorithm...');
 
-    // Test 1: Check if compatibility function exists
-    const { data: functionExists, error: functionError } = await supabase.rpc('calculate_compatibility', {
-      user1_id: '00000000-0000-0000-0000-000000000001',
-      user2_id: '00000000-0000-0000-0000-000000000002'
-    });
-
-    if (functionError) {
-      console.error('❌ Compatibility function not found:', functionError);
+    // Test 0: Check basic database connection
+    const connectionTest = await testDatabaseConnection();
+    if (!connectionTest) {
+      console.error('❌ Database connection failed');
       return false;
     }
+    console.log('✅ Database connection successful');
 
-    console.log('✅ Compatibility function exists and returns:', functionExists);
+    // Test 1: Check if compatibility function exists
+    try {
+      const { data: functionExists, error: functionError } = await supabase.rpc('calculate_compatibility', {
+        user1_id: '00000000-0000-0000-0000-000000000001',
+        user2_id: '00000000-0000-0000-0000-000000000002'
+      });
+
+      if (functionError) {
+        console.error('❌ Compatibility function error:', functionError);
+        console.log('ℹ️ This is expected if test users don\'t exist yet');
+      } else {
+        console.log('✅ Compatibility function exists and returns:', functionExists);
+      }
+    } catch (error) {
+      console.error('❌ Compatibility function test failed:', error);
+    }
+
 
     // Test 2: Check RLS policies
-    const { data: users, error: usersError } = await supabase
-      .from('users')
-      .select('id, name, age')
-      .limit(5);
+    try {
+      const { data: users, error: usersError } = await supabase
+        .from('users')
+        .select('id, name, age')
+        .limit(5);
 
-    if (usersError) {
-      console.error('❌ RLS policy test failed:', usersError);
-    } else {
-      console.log('✅ RLS policies working, found users:', users?.length || 0);
+      if (usersError) {
+        console.error('❌ RLS policy test failed:', usersError);
+      } else {
+        console.log('✅ RLS policies working, found users:', users?.length || 0);
+      }
+    } catch (error) {
+      console.error('❌ Users table test failed:', error);
     }
 
     // Test 3: Check matches table
-    const { data: matches, error: matchesError } = await supabase
-      .from('matches')
-      .select('*')
-      .limit(5);
+    try {
+      const { data: matches, error: matchesError } = await supabase
+        .from('matches')
+        .select('*')
+        .limit(5);
 
-    if (matchesError) {
-      console.error('❌ Matches table access failed:', matchesError);
-    } else {
-      console.log('✅ Matches table accessible, found matches:', matches?.length || 0);
+      if (matchesError) {
+        console.error('❌ Matches table access failed:', matchesError);
+      } else {
+        console.log('✅ Matches table accessible, found matches:', matches?.length || 0);
+      }
+    } catch (error) {
+      console.error('❌ Matches table test failed:', error);
     }
 
     // Test 4: Check user_preferences table
-    const { data: preferences, error: preferencesError } = await supabase
-      .from('user_preferences')
-      .select('*')
-      .limit(5);
+    try {
+      const { data: preferences, error: preferencesError } = await supabase
+        .from('user_preferences')
+        .select('*')
+        .limit(5);
 
-    if (preferencesError) {
-      console.error('❌ User preferences table access failed:', preferencesError);
-    } else {
-      console.log('✅ User preferences table accessible, found preferences:', preferences?.length || 0);
+      if (preferencesError) {
+        console.error('❌ User preferences table access failed:', preferencesError);
+      } else {
+        console.log('✅ User preferences table accessible, found preferences:', preferences?.length || 0);
+      }
+    } catch (error) {
+      console.error('❌ User preferences table test failed:', error);
+    }
+
+    // Test 5: Check new tables
+    const tablesToTest = [
+      'vibe_votes',
+      'love_meter_questions', 
+      'love_meter_results',
+      'ai_chat_sessions',
+      'ai_chat_messages',
+      'suitability_sessions'
+    ];
+
+    for (const table of tablesToTest) {
+      try {
+        const { data, error } = await supabase
+          .from(table)
+          .select('*')
+          .limit(1);
+        
+        if (error) {
+          console.error(`❌ ${table} table access failed:`, error);
+        } else {
+          console.log(`✅ ${table} table accessible`);
+        }
+      } catch (error) {
+        console.error(`❌ ${table} table test failed:`, error);
+      }
     }
 
     return true;

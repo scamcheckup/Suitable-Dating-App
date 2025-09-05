@@ -54,6 +54,10 @@ export const getEnvironmentStatus = () => {
       apiKey: ENV_CONFIG.KUDISMS_API_KEY ? '✅ Configured' : '❌ Missing (Optional)',
       endpoint: ENV_CONFIG.KUDISMS_ENDPOINT ? '✅ Configured' : '❌ Missing (Optional)',
     },
+    gemini: {
+      configured: !!(process.env.EXPO_PUBLIC_GEMINI_API_KEY),
+      apiKey: process.env.EXPO_PUBLIC_GEMINI_API_KEY ? '✅ Configured' : '❌ Missing (Optional)',
+    },
     overall: validation.valid,
     missing: validation.missing,
   };
