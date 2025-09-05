@@ -46,6 +46,8 @@ export default function LoginScreen() {
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           setErrors({ general: 'Invalid email or password' });
+        } else if (error.message.includes('invalid_credentials')) {
+          setErrors({ general: 'Invalid email or password. Please check your credentials and try again.' });
         } else {
           setErrors({ general: error.message });
         }
