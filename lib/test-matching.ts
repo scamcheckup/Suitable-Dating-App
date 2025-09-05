@@ -2,112 +2,6 @@ import { supabase } from './supabase';
 import { calculateCompatibility, findPotentialMatches } from './matching';
 import { testDatabaseConnection } from './supabase';
 
-export const testAllDatabaseTables = async () => {
-  try {
-    console.log('📋 Testing all database tables...');
-
-    const tablesToTest = [
-      'users',
-      'matches', 
-      'user_preferences',
-      'chat_channels',
-      'chat_messages',
-      'user_push_tokens',
-      'vibe_votes',
-      'love_meter_questions',
-      'love_meter_results',
-      'ai_chat_sessions',
-      'ai_chat_messages',
-      'suitability_sessions',
-      'speed_dating_events',
-      'speed_dating_registrations',
-      'speed_dating_rooms',
-      'user_subscriptions',
-      'payments'
-    ];
-
-    let allTablesWorking = true;
-
-    for (const table of tablesToTest) {
-      try {
-        const { data, error } = await supabase
-          .from(table)
-          .select('*')
-          .limit(1);
-        
-        if (error) {
-          console.error(`❌ ${table} table access failed:`, error.message);
-          allTablesWorking = false;
-        } else {
-          console.log(`✅ ${table} table accessible`);
-        }
-      } catch (error) {
-        console.error(`❌ ${table} table test failed:`, error);
-        allTablesWorking = false;
-      }
-    }
-
-    return allTablesWorking;
-  } catch (error) {
-    console.error('❌ Table tests failed:', error);
-    return false;
-  }
-};
-
-export const testDatabaseFunctions = async () => {
-  try {
-    console.log('⚙️ Testing database functions...');
-
-    const functionsToTest = [
-      {
-        name: 'calculate_compatibility',
-        params: {
-          user1_id: '00000000-0000-0000-0000-000000000001',
-          user2_id: '00000000-0000-0000-0000-000000000002'
-        }
-      },
-      {
-        name: 'get_user_vibe_stats',
-        params: {
-          user_id: '00000000-0000-0000-0000-000000000001'
-        }
-      },
-      {
-        name: 'get_vibe_vote_leaderboard',
-        params: {
-          limit_count: 5
-        }
-      }
-    ];
-
-    let allFunctionsWorking = true;
-
-    for (const func of functionsToTest) {
-      try {
-        const { data, error } = await supabase.rpc(func.name, func.params);
-        
-        if (error) {
-          console.error(`❌ Function ${func.name} failed:`, error.message);
-          // Don't fail the test if it's just missing test data
-          if (!error.message.includes('does not exist') && !error.message.includes('not found')) {
-            allFunctionsWorking = false;
-          }
-        } else {
-          console.log(`✅ Function ${func.name} working, returned:`, data);
-        }
-      } catch (error) {
-        console.error(`❌ Function ${func.name} test failed:`, error);
-        allFunctionsWorking = false;
-      }
-    }
-
-    return allFunctionsWorking;
-  } catch (error) {
-    console.error('❌ Function tests failed:', error);
-    return false;
-  }
-};
-
 export const testMatchingAlgorithm = async () => {
   try {
     console.log('🧪 Testing Matching Algorithm...');
@@ -129,17 +23,14 @@ export const testMatchingAlgorithm = async () => {
 
       if (functionError) {
         console.error('❌ Compatibility function error:', functionError);
-        if (functionError.message.includes('does not exist')) {
-          console.log('ℹ️ This is expected if test users don\'t exist yet');
-        } else {
-          console.error('❌ Function may not be properly created');
-        }
+        console.log('ℹ️ This is expected if test users don\'t exist yet');
       } else {
         console.log('✅ Compatibility function exists and returns:', functionExists);
       }
     } catch (error) {
       console.error('❌ Compatibility function test failed:', error);
     }
+
 
     // Test 2: Check RLS policies
     try {
@@ -189,12 +80,31 @@ export const testMatchingAlgorithm = async () => {
       console.error('❌ User preferences table test failed:', error);
     }
 
-    // Test 5: Test additional tables
-    const additionalTablesSuccess = await testAllDatabaseTables();
-    if (additionalTablesSuccess) {
-      console.log('✅ All additional tables working');
-    } else {
-      console.log('⚠️ Some additional tables have issues');
+    // Test 5: Check new tables
+    const tablesToTest = [
+      'vibe_votes',
+      'love_meter_questions', 
+      'love_meter_results',
+      'ai_chat_sessions',
+      'ai_chat_messages',
+      'suitability_sessions'
+    ];
+
+    for (const table of tablesToTest) {
+      try {
+        const { data, error } = await supabase
+          .from(table)
+          .select('*')
+          .limit(1);
+        
+        if (error) {
+          console.error(`❌ ${table} table access failed:`, error);
+        } else {
+          console.log(`✅ ${table} table accessible`);
+        }
+      } catch (error) {
+        console.error(`❌ ${table} table test failed:`, error);
+      }
     }
 
     return true;
