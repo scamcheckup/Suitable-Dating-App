@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { testMatchingAlgorithm, createTestUsers, testAllDatabaseTables, testDatabaseFunctions } from '@/lib/test-matching';
-import { ArrowLeft, Play, Users, Database, Heart, CheckCircle, AlertTriangle } from 'lucide-react-native';
+import { ArrowLeft, Play, Users, Database, Heart, CircleCheck as CheckCircle, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 import { router } from 'expo-router';
 import { testDatabaseConnection } from '@/lib/supabase';
 
